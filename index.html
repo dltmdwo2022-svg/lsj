@@ -3921,6 +3921,7 @@
     </div>
     <script>
         'use strict';
+        window.onerror = function(msg, src, line, col, err) { console.error('Global error:', msg, 'at', src, line, col, err); try { var r = document.getElementById('appRoot'); if (r) r.style.display = ''; var l = document.getElementById('appLoader'); if (l) l.style.display = 'none' } catch(e) {} };
 
         /* ===== Constants ===== */
         const DAY_MS = 864e5, MAX_UNDO = 30, SAVE_DELAY = 2000, PAGE_SIZE = 30, BACKUP_KEY = 'fc_954c2e6ecc33_autoBackup', RESULT_DELAY = 1000, TOAST_DURATION = 2200, UNDO_TOAST_DURATION = 5000, API_TIMEOUT = 30000, TTS_CANCEL_DELAY = 150;
@@ -4790,9 +4791,11 @@
                 window.addEventListener('online', () => { const ob = $('offlineBanner'); if (ob) ob.style.display = 'none'; updateOfflineUI() });
                 window.addEventListener('offline', () => { const ob = $('offlineBanner'); if (ob) ob.style.display = 'block'; updateOfflineUI() });
                 if (!isOnline()) { const ob = $('offlineBanner'); if (ob) ob.style.display = 'block' }
-            } catch (e) { console.error('Init:', e) }
-            finally { $('appRoot').style.display = ''; const loader = $('appLoader'); loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none' }, 400) }
+            } catch (e) { console.error('Init error:', e) }
+            finally { try { const r = $('appRoot'); if (r) r.style.display = ''; const loader = $('appLoader'); if (loader) { loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none' }, 400) } } catch (fe) { console.error('Loader dismiss error:', fe) } }
         }
+        // Failsafe: force dismiss loader after 10s even if init() never completes
+        setTimeout(function() { try { const r = $('appRoot'); if (r) r.style.display = ''; const l = $('appLoader'); if (l) l.style.display = 'none' } catch(e) {} }, 10000);
         init();
     </script>
 </body>
